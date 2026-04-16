@@ -1,30 +1,30 @@
-import json
+import time
+import functools
 
-def read_json(file_path):
-    with open(file_path, 'r') as file:
-        return json.load(file)
+def timeit(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        print(f"{func.__name__} executed in {end_time - start_time:.4f} seconds")
+        return result
+    return wrapper
 
+@timeit
+def compute_heavy_task(n):
+    total = 0
+    for i in range(n):
+        total += sum(j ** 2 for j in range(1000))
+    return total
 
-def write_json(file_path, data):
-    with open(file_path, 'w') as file:
-        json.dump(data, file, indent=4)
+@timeit
+def optimize_data_processing(data):
+    unique_data = set(data)
+    processed_data = {element: data.count(element) for element in unique_data}
+    return processed_data
 
-
-def merge_dicts(dict1, dict2):
-    merged = dict1.copy()
-    merged.update(dict2)
-    return merged
-
-
-def flatten_list(nested_list):
-    return [item for sublist in nested_list for item in sublist]
-
-
-def generate_unique_id(prefix='id', existing_ids=None):
-    import uuid
-    existing_ids = existing_ids or set()
-    unique_id = f'{prefix}_{uuid.uuid4()}'
-    while unique_id in existing_ids:
-        unique_id = f'{prefix}_{uuid.uuid4()}'
-    return unique_id
-
+if __name__ == "__main__":
+    print(compute_heavy_task(5))
+    sample_data = [1, 2, 2, 3, 3, 3]
+    print(optimize_data_processing(sample_data))
