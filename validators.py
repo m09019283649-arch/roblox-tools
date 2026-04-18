@@ -1,26 +1,24 @@
-def validate_input(user_input):
-    if not isinstance(user_input, str):
-        raise ValueError('Input must be a string')
-    if len(user_input) < 3:
-        raise ValueError('Input must be at least 3 characters long')
-    if any(char.isdigit() for char in user_input):
-        raise ValueError('Input must not contain numbers')
-    return True
+def validate_input(input_data):
+    if not isinstance(input_data, dict):
+        raise ValueError('Input must be a dictionary')
+    if 'username' not in input_data or not isinstance(input_data['username'], str):
+        raise ValueError('Missing or invalid username')
+    if 'age' not in input_data or not isinstance(input_data['age'], int) or input_data['age'] < 0:
+        raise ValueError('Missing or invalid age')
+    if 'score' not in input_data or not isinstance(input_data['score'], (int, float)):
+        raise ValueError('Missing or invalid score')
 
-def main_loop():
-    while True:
-        try:
-            user_input = input('Enter a command: ')
-            validate_input(user_input)
-            process_command(user_input)
-        except ValueError as e:
-            print(f'Error: {e}')
-        except KeyboardInterrupt:
-            print('\nExiting program.')
-            break
+# Example of main processing loop
+input_list = [
+    {'username': 'Player1', 'age': 21, 'score': 1500},
+    {'username': 'Player2', 'age': -5, 'score': 2000},
+    'InvalidInput',
+    {'username': 'Player3', 'score': 3000},
+]
 
-if __name__ == '__main__':
-    main_loop()
-
-def process_command(cmd):
-    print(f'Processing command: {cmd}')
+for input_data in input_list:
+    try:
+        validate_input(input_data)
+        print(f'Validated input: {input_data}')
+    except ValueError as e:
+        print(f'Input validation error: {e}')
