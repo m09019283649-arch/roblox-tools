@@ -1,45 +1,22 @@
 class RobloxError(Exception):
-    """
-    Base class for all exceptions related to Roblox.
-    """
+    """Base class for all Roblox-related exceptions."""
     pass
 
-class UserNotFoundError(RobloxError):
-    """
-    Exception raised when a user cannot be found.
-    """
-    def __init__(self, username):
-        super().__init__(f'User not found: {username}')
-        self.username = username
+class DataNotFoundError(RobloxError):
+    """Raised when the requested data is not found."""
+    def __init__(self, data_key):
+        self.data_key = data_key
+        super().__init__(f'Data not found for key: {data_key}')
 
-class PermissionDeniedError(RobloxError):
-    """
-    Exception raised when a user lacks permission.
-    """
-    def __init__(self, action):
-        super().__init__(f'Permission denied for action: {action}')
-        self.action = action
+class InvalidDataFormatError(RobloxError):
+    """Raised when data format is invalid."""
+    def __init__(self, expected_format, received_format):
+        self.expected_format = expected_format
+        self.received_format = received_format
+        super().__init__(f'Expected format: {expected_format}, but received: {received_format}')
 
-class InvalidGameIdError(RobloxError):
-    """
-    Exception raised for invalid game IDs.
-    """
-    def __init__(self, game_id):
-        super().__init__(f'Invalid game ID: {game_id}')
-        self.game_id = game_id
-
-class InvalidAssetError(RobloxError):
-    """
-    Exception raised for invalid asset references.
-    """
-    def __init__(self, asset_name):
-        super().__init__(f'Invalid asset: {asset_name}')
-        self.asset_name = asset_name
-
-class RequestTimeoutError(RobloxError):
-    """
-    Exception raised for request timeouts.
-    """
-    def __init__(self, url):
-        super().__init__(f'Request to {url} timed out')
-        self.url = url
+class APIRequestError(RobloxError):
+    """Raised when an API request fails."""
+    def __init__(self, status_code, message='API request failed'): 
+        self.status_code = status_code
+        super().__init__(f'{message} - Status code: {status_code}')
