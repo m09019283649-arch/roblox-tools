@@ -1,24 +1,32 @@
-def validate_input(input_data):
-    if not isinstance(input_data, dict):
-        raise ValueError('Input must be a dictionary')
-    if 'username' not in input_data or not isinstance(input_data['username'], str):
-        raise ValueError('Missing or invalid username')
-    if 'age' not in input_data or not isinstance(input_data['age'], int) or input_data['age'] < 0:
-        raise ValueError('Missing or invalid age')
-    if 'score' not in input_data or not isinstance(input_data['score'], (int, float)):
-        raise ValueError('Missing or invalid score')
+import re
 
-# Example of main processing loop
-input_list = [
-    {'username': 'Player1', 'age': 21, 'score': 1500},
-    {'username': 'Player2', 'age': -5, 'score': 2000},
-    'InvalidInput',
-    {'username': 'Player3', 'score': 3000},
-]
+def is_valid_username(username):
+    if not username:
+        return False
+    return 3 <= len(username) <= 20 and re.match('^[a-zA-Z][a-zA-Z0-9_]*$', username)
 
-for input_data in input_list:
-    try:
-        validate_input(input_data)
-        print(f'Validated input: {input_data}')
-    except ValueError as e:
-        print(f'Input validation error: {e}')
+
+def is_valid_password(password):
+    if not password:
+        return False
+    return (
+        len(password) >= 8 and
+        re.search('[A-Z]', password) and
+        re.search('[a-z]', password) and
+        re.search('[0-9]', password)
+    )
+
+
+def is_valid_email(email):
+    if not email:
+        return False
+    regex = ('^[a-z0-9]+[._%+-]*[a-z0-9]*@[a-z0-9]+[-]?[a-z0-9]+\.[a-z]{2,}$')
+    return re.match(regex, email) is not None
+
+
+def is_positive_integer(value):
+    return isinstance(value, int) and value > 0
+
+
+def is_valid_coord(x, y):
+    return is_positive_integer(x) and is_positive_integer(y)
