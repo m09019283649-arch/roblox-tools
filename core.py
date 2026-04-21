@@ -1,27 +1,41 @@
-import time
-import functools
+from typing import List, Dict, Any
 
-class PerformanceTracker:
-    def __init__(self, func):
-        self.func = func
 
-    def __call__(self, *args, **kwargs):
-        start_time = time.time()
-        result = self.func(*args, **kwargs)
-        duration = time.time() - start_time
-        print(f'Performance: {self.func.__name__} took {duration:.4f} seconds')
-        return result
+def calculate_player_stats(player_data: List[Dict[str, Any]]) -> Dict[str, float]:
+    """
+    Calculate average stats for a list of players.
 
-@PerformanceTracker
-def expensive_operation(data):
-    total = sum(x * x for x in data)
-    return total
+    Args:
+        player_data (List[Dict[str, Any]]): List of dictionaries containing player stats.
 
-@PerformanceTracker
-def process_data(data_list):
-    results = [expensive_operation(data) for data in data_list]
-    return results
+    Returns:
+        Dict[str, float]: Dictionary containing average stats.
+    """
+    total_score = 0
+    total_time = 0
+    total_players = len(player_data)
 
-if __name__ == '__main__':
-    sample_data = [range(10000), range(20000), range(30000)]
-    print(process_data(sample_data))
+    for player in player_data:
+        total_score += player.get('score', 0)
+        total_time += player.get('time_played', 0)
+
+    avg_score = total_score / total_players if total_players else 0
+    avg_time = total_time / total_players if total_players else 0
+
+    return {
+        'average_score': avg_score,
+        'average_time': avg_time
+    }
+
+
+def log_top_players(player_data: List[Dict[str, Any]], top_n: int = 5) -> None:
+    """
+    Log the top N players based on their scores.
+
+    Args:
+        player_data (List[Dict[str, Any]]): List of dictionaries containing player stats.
+        top_n (int): Number of top players to log.
+    """
+    sorted_players = sorted(player_data, key=lambda x: x.get('score', 0), reverse=True)[:top_n]
+    for i, player in enumerate(sorted_players, start=1):
+        print(f'#{i} Player: {player.get('name')}, Score: {player.get('score')}')
