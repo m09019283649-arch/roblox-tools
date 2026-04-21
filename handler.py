@@ -1,44 +1,36 @@
 import json
+import requests
 
-class RobloxError(Exception):
-    pass
+def fetch_roblox_data(asset_id):
+    url = f'https://api.roblox.com/marketplace/productinfo?id={{asset_id}}'
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        return data
+    except requests.RequestException as e:
+        print(f'Error fetching data: {e}')
+        return None
 
-class ItemNotFoundError(RobloxError):
-    pass
 
-class InvalidDataError(RobloxError):
-    pass
+def parse_roblox_data(data):
+    if not data:
+        return 'No data available'
+    parsed = {
+        'name': data.get('Name', 'Unknown'),
+        'description': data.get('Description', 'No description'),
+        'price': data.get('PriceInRobux', 0),
+        'creator': data.get('Creator', {}).get('Name', 'Unknown')
+    }
+    return json.dumps(parsed, indent=2)
 
-class RobloxHandler:
-    def __init__(self, data):
-        self.data = data
 
-    def fetch_item(self, item_id):
-        try:
-            if not isinstance(item_id, int) or item_id <= 0:
-                raise InvalidDataError('Item ID must be a positive integer.')
-            item = self.data.get(item_id)
-            if item is None:
-                raise ItemNotFoundError(f'Item with ID {item_id} not found.')
-            return item
-        except (InvalidDataError, ItemNotFoundError) as e:
-            return json.dumps({'error': str(e)})
+def main(asset_id):
+    data = fetch_roblox_data(asset_id)
+    result = parse_roblox_data(data)
+    print(result)
 
-    def add_item(self, item_id, item):
-        try:
-            if not isinstance(item_id, int) or item_id <= 0:
-                raise InvalidDataError('Item ID must be a positive integer.')
-            if item_id in self.data:
-                raise ItemNotFoundError(f'Item with ID {item_id} already exists.')
-            self.data[item_id] = item
-            return json.dumps({'success': 'Item added successfully.'})
-        except (InvalidDataError, ItemNotFoundError) as e:
-            return json.dumps({'error': str(e)})
 
-# Example usage
 if __name__ == '__main__':
-    handler = RobloxHandler({})
-    print(handler.add_item(-1, {}))  # Invalid ID
-    print(handler.fetch_item(1))  # Not found
-    print(handler.add_item(1, {'name': 'Sword'}))  # Success
-    print(handler.fetch_item(1))  # Fetch success
+    asset_id = 12345678  # Sample asset ID
+    main(asset_id)
