@@ -1,19 +1,35 @@
-import time
-import random
+import json
 import requests
 
-def retry_request(url, method='GET', data=None, max_retries=5, backoff_factor=0.3):
-    retries = 0
-    while retries < max_retries:
-        try:
-            if method.upper() == 'POST':
-                response = requests.post(url, json=data)
-            else:
-                response = requests.get(url)
-            response.raise_for_status()
+class RobloxDataHandler:
+    def __init__(self, base_url):
+        self.base_url = base_url
+
+    def get_data(self, endpoint):
+        response = requests.get(f'{self.base_url}/{endpoint}')
+        if response.status_code == 200:
             return response.json()
-        except requests.exceptions.RequestException as e:
-            print(f'Retry {retries + 1}/{max_retries} for {url} - Error: {e}')
-            retries += 1
-            time.sleep(backoff_factor * (2 ** (retries - 1)) + random.uniform(0, 1))
-    raise Exception(f'Max retries exceeded for {url}')
+        else:
+            raise Exception(f'Error: {response.status_code} - {response.text}')
+
+    def save_data_to_file(self, data, filename):
+        with open(filename, 'w') as f:
+            json.dump(data, f, indent=4)
+
+    def load_data_from_file(self, filename):
+        with open(filename, 'r') as f:
+            return json.load(f)
+
+    def update_data_value(self, filename, key, new_value):
+        data = self.load_data_from_file(filename)
+        if key in data:
+            data[key] = new_value
+            self.save_data_to_file(data, filename)
+        else:
+            raise KeyError(f'Key {key} not found in data')
+
+# Usage Example:
+# handler = RobloxDataHandler('https://data.roblox.com')
+# data = handler.get_data('example_endpoint')
+# handler.save_data_to_file(data, 'data.json')
+# handler.update_data_value('data.json', 'example_key', 'new_value')
