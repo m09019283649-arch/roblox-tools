@@ -1,28 +1,27 @@
-import json
+import time
 import requests
 
-class RobloxDataProcessor:
-    def __init__(self, base_url):
-        self.base_url = base_url
+class NetworkException(Exception):
+    pass
 
-    def fetch_data(self, endpoint):
-        response = requests.get(f'{self.base_url}/{endpoint}')
-        if response.status_code != 200:
-            raise Exception(f'Error fetching data: {response.status_code}')
-        return response.json()
+def request_with_retry(url, retries=3, delay=2):
+    attempt = 0
+    while attempt < retries:
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            attempt += 1
+            if attempt == retries:
+                raise NetworkException(f'Failed after {retries} attempts: {e}')
+            time.sleep(delay)
 
-    def filter_data(self, data, criteria):
-        return [item for item in data if all(item.get(k) == v for k, v in criteria.items())]  
-
-    def save_as_json(self, data, filename):
-        with open(filename, 'w') as json_file:
-            json.dump(data, json_file, indent=4)
-
-    def process_data(self, endpoint, criteria, filename):
-        data = self.fetch_data(endpoint)
-        filtered_data = self.filter_data(data, criteria)
-        self.save_as_json(filtered_data, filename)
-
-# Example usage (commented out):
-# processor = RobloxDataProcessor('https://api.roblox.com')
-# processor.process_data('users', {'isFriend': True}, 'friends.json')
+def process_data(url):
+    try:
+        data = request_with_retry(url)
+        # Process your data here
+        return data
+    except NetworkException as e:
+        print(e)
+        return None
