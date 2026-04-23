@@ -1,38 +1,38 @@
 import json
 import os
 
-DEFAULT_CONFIG = {
-    'username': 'guest',
-    'max_players': 10,
-    'game_mode': 'classic',
-    'sound_enabled': True,
-    'graphics_quality': 'high'
+class ConfigLoader:
+    def __init__(self, default_config):
+        self.default_config = default_config
+        self.config = self.load_config()
+
+    def load_config(self):
+        config_path = 'config.json'
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as f:
+                user_config = json.load(f)
+            return self.merge_configs(self.default_config, user_config)
+        return self.default_config
+
+    def merge_configs(self, default, user):
+        merged = default.copy()
+        for key, value in user.items():
+            if isinstance(value, dict) and key in merged:
+                merged[key] = self.merge_configs(merged[key], value)
+            else:
+                merged[key] = value
+        return merged
+
+# Example default configuration
+default_config = {
+    'setting1': True,
+    'setting2': 42,
+    'nested': {
+        'sub_setting1': 'default',
+        'sub_setting2': 3.14
+    }
 }
 
-class ConfigLoader:
-    def __init__(self, config_file='config.json'):
-        self.config_file = config_file
-        self.config = DEFAULT_CONFIG.copy()
-        self.load_configuration()
-
-    def load_configuration(self):
-        if os.path.exists(self.config_file):
-            with open(self.config_file, 'r') as file:
-                user_config = json.load(file)
-                self.config.update(user_config)
-
-    def get(self, key, default=None):
-        return self.config.get(key, default)
-
-    def set(self, key, value):
-        self.config[key] = value
-
-    def save(self):
-        with open(self.config_file, 'w') as file:
-            json.dump(self.config, file, indent=4)
-
-# Example of usage:
-# config_loader = ConfigLoader()
-# print(config_loader.get('username'))
-# config_loader.set('username', 'Player1')
-# config_loader.save()
+# Load configuration
+config_loader = ConfigLoader(default_config)
+config = config_loader.config
