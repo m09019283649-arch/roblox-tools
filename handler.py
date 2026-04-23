@@ -1,36 +1,34 @@
-import json
 import requests
+import time
+import random
 
-def fetch_roblox_data(asset_id):
-    url = f'https://api.roblox.com/marketplace/productinfo?id={{asset_id}}'
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
-        return data
-    except requests.RequestException as e:
-        print(f'Error fetching data: {e}')
-        return None
+def retry_request(func):
+    def wrapper(*args, **kwargs):
+        retries = 5
+        delay = 1
+        for attempt in range(retries):
+            try:
+                return func(*args, **kwargs)
+            except requests.RequestException as e:
+                if attempt < retries - 1:
+                    wait_time = delay + random.uniform(0, 1)
+                    print(f'Attempt {attempt + 1} failed: {e}. Retrying in {wait_time:.2f} seconds...')
+                    time.sleep(wait_time)
+                else:
+                    print('All retry attempts failed.')
+                    raise
+    return wrapper
 
-
-def parse_roblox_data(data):
-    if not data:
-        return 'No data available'
-    parsed = {
-        'name': data.get('Name', 'Unknown'),
-        'description': data.get('Description', 'No description'),
-        'price': data.get('PriceInRobux', 0),
-        'creator': data.get('Creator', {}).get('Name', 'Unknown')
-    }
-    return json.dumps(parsed, indent=2)
-
-
-def main(asset_id):
-    data = fetch_roblox_data(asset_id)
-    result = parse_roblox_data(data)
-    print(result)
-
+@retry_request
+def fetch_data(url):
+    response = requests.get(url)
+    response.raise_for_status()  # Will raise an exception for HTTP errors
+    return response.json()
 
 if __name__ == '__main__':
-    asset_id = 12345678  # Sample asset ID
-    main(asset_id)
+    url = 'https://api.example.com/data'
+    try:
+        data = fetch_data(url)
+        print(data)
+    except Exception as e:
+        print(f'Failed to fetch data: {e}')
