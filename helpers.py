@@ -1,37 +1,35 @@
-import time
+import json
+import random
+import string
 
-class PerformanceTracker:
-    def __init__(self):
-        self.records = {}
+def generate_random_string(length=10):
+    '''Generate a random string of fixed length'''  
+    letters = string.ascii_letters  
+    return ''.join(random.choice(letters) for i in range(length))
 
-    def start(self, name):
-        self.records[name] = time.perf_counter()
 
-    def stop(self, name):
-        if name in self.records:
-            elapsed_time = time.perf_counter() - self.records[name]
-            del self.records[name]
-            return elapsed_time
-        return None
+def load_json_file(filepath):
+    '''Load JSON data from a file'''  
+    with open(filepath, 'r') as file:
+        return json.load(file)
 
-def optimize_function(func):
-    def wrapper(*args, **kwargs):
-        tracker = PerformanceTracker()
-        tracker.start(func.__name__)
-        result = func(*args, **kwargs)
-        elapsed_time = tracker.stop(func.__name__)
-        print(f'Function {func.__name__} took {elapsed_time:.4f} seconds')
-        return result
-    return wrapper
 
-@optimize_function
-def compute_heavy_operation(data):
-    total = 0
-    for number in data:
-        total += number ** 2  # Example heavy computation
-    return total
+def save_json_file(data, filepath):
+    '''Save data to a JSON file'''  
+    with open(filepath, 'w') as file:
+        json.dump(data, file, indent=4)
 
-# Example usage
-if __name__ == '__main__':
-    data = range(10000)
-    compute_heavy_operation(data)
+
+def pretty_print_json(data):
+    '''Pretty print JSON data'''  
+    print(json.dumps(data, indent=4))
+
+
+def flatten_list(nested_list):
+    '''Flatten a nested list'''  
+    return [item for sublist in nested_list for item in sublist]
+
+
+def merge_dicts(dict1, dict2):
+    '''Merge two dictionaries into one'''  
+    return {**dict1, **dict2}
