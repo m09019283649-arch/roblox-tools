@@ -1,32 +1,46 @@
-import json
-import requests
+from typing import Any, Dict, List, Optional
 
-class RobloxDataHandler:
-    def __init__(self, api_url):
-        self.api_url = api_url
+class RobloxHandler:
+    def __init__(self, api_key: str, base_url: str) -> None:
+        """
+        Initializes the RobloxHandler with API key and base URL.
+        
+        :param api_key: The API key for authentication.
+        :param base_url: The base URL for the Roblox API.
+        """
+        self.api_key = api_key
+        self.base_url = base_url
 
-    def fetch_data(self, endpoint, params=None):
-        try:
-            response = requests.get(f'{self.api_url}/{endpoint}', params=params)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            print(f'Error fetching data: {e}')  
-            return None
+    def fetch_data(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Fetches data from the given API endpoint.
+        
+        :param endpoint: The API endpoint to fetch data from.
+        :param params: Optional dictionary of query parameters.
+        :return: Parsed JSON response from the API.
+        """
+        import requests
+        response = requests.get(f"{self.base_url}/{endpoint}", params=params, headers={"Authorization": f"Bearer {self.api_key}"})
+        response.raise_for_status()
+        return response.json()
 
-    def save_data(self, filename, data):
-        with open(filename, 'w') as json_file:
-            json.dump(data, json_file, indent=4)
+    def process_result(self, data: Dict[str, Any]) -> List[str]:
+        """
+        Processes the fetched data and returns a list of results.
+        
+        :param data: The data dictionary to process.
+        :return: List of processed result strings.
+        """
+        return [f"Result: {item['name']} (ID: {item['id']})" for item in data.get('results', [])]
 
-    def load_data(self, filename):
-        try:
-            with open(filename, 'r') as json_file:
-                return json.load(json_file)
-        except (FileNotFoundError, json.JSONDecodeError) as e:
-            print(f'Error loading data: {e}')  
-            return None
-
-    def get_player_stats(self, player_id):
-        endpoint = 'players'
-        params = {'id': player_id}
-        return self.fetch_data(endpoint, params)
+    def handle_request(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> List[str]:
+        """
+        Handles the entire request process and returns the results.
+        
+        :param endpoint: The API endpoint to hit.
+        :param params: Optional parameters for the request.
+        :return: List of processed results.
+        """
+        data = self.fetch_data(endpoint, params)
+        results = self.process_result(data)
+        return results
