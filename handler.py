@@ -1,34 +1,32 @@
+import json
 import requests
-import time
-import random
 
-def retry_request(func):
-    def wrapper(*args, **kwargs):
-        retries = 5
-        delay = 1
-        for attempt in range(retries):
-            try:
-                return func(*args, **kwargs)
-            except requests.RequestException as e:
-                if attempt < retries - 1:
-                    wait_time = delay + random.uniform(0, 1)
-                    print(f'Attempt {attempt + 1} failed: {e}. Retrying in {wait_time:.2f} seconds...')
-                    time.sleep(wait_time)
-                else:
-                    print('All retry attempts failed.')
-                    raise
-    return wrapper
+class RobloxDataHandler:
+    def __init__(self, api_url):
+        self.api_url = api_url
 
-@retry_request
-def fetch_data(url):
-    response = requests.get(url)
-    response.raise_for_status()  # Will raise an exception for HTTP errors
-    return response.json()
+    def fetch_data(self, endpoint, params=None):
+        try:
+            response = requests.get(f'{self.api_url}/{endpoint}', params=params)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f'Error fetching data: {e}')  
+            return None
 
-if __name__ == '__main__':
-    url = 'https://api.example.com/data'
-    try:
-        data = fetch_data(url)
-        print(data)
-    except Exception as e:
-        print(f'Failed to fetch data: {e}')
+    def save_data(self, filename, data):
+        with open(filename, 'w') as json_file:
+            json.dump(data, json_file, indent=4)
+
+    def load_data(self, filename):
+        try:
+            with open(filename, 'r') as json_file:
+                return json.load(json_file)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f'Error loading data: {e}')  
+            return None
+
+    def get_player_stats(self, player_id):
+        endpoint = 'players'
+        params = {'id': player_id}
+        return self.fetch_data(endpoint, params)
