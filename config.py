@@ -1,20 +1,29 @@
+import json
 import os
 
-class Config:
-    def __init__(self):
-        self.environment = self.get_env()
-        self.db_uri = self.get_db_uri()
-        self.api_key = self.get_api_key()
+DEFAULT_CONFIG = {
+    'server_host': 'localhost',
+    'server_port': 8080,
+    'debug_mode': False,
+    'max_users': 50,
+}
 
-    def get_env(self):
-        return os.getenv('ENVIRONMENT', 'development')
+class ConfigLoader:
+    def __init__(self, config_file='config.json'):
+        self.config_file = config_file
+        self.config = self.load_config()
 
-    def get_db_uri(self):
-        return os.getenv('DATABASE_URI', 'sqlite:///db.sqlite')
+    def load_config(self):
+        if os.path.exists(self.config_file):
+            with open(self.config_file, 'r') as f:
+                user_config = json.load(f)
+            return {**DEFAULT_CONFIG, **user_config}
+        return DEFAULT_CONFIG
 
-    def get_api_key(self):
-        if self.environment == 'production':
-            return os.getenv('API_KEY')
-        return 'test-api-key'
+    def get(self, key, default=None):
+        return self.config.get(key, default)
 
-config = Config()
+config_loader = ConfigLoader()
+
+if __name__ == '__main__':
+    print(config_loader.config)
