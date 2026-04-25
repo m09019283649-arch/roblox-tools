@@ -1,34 +1,48 @@
-import re
+from typing import Any, Dict, Union
 
-class InputValidationError(Exception):
-    pass
+def validate_integer(value: Any, min_value: int = 0, max_value: int = 100) -> bool:
+    """
+    Validate if the input is an integer within a specified range.
 
-def validate_username(username):
-    if not isinstance(username, str):
-        raise InputValidationError('Username must be a string.')
-    if not re.match('^[a-zA-Z0-9_]{3,20}$', username):
-        raise InputValidationError('Username must be 3-20 characters long and can contain letters, numbers, and underscores.')
+    Args:
+        value (Any): The value to validate.
+        min_value (int): The minimum valid value (inclusive).
+        max_value (int): The maximum valid value (inclusive).
 
-
-def validate_password(password):
-    if not isinstance(password, str):
-        raise InputValidationError('Password must be a string.')
-    if len(password) < 8:
-        raise InputValidationError('Password must be at least 8 characters long.')
-    if not re.search('[A-Za-z]', password) or not re.search('[0-9]', password):
-        raise InputValidationError('Password must contain both letters and numbers.')
+    Returns:
+        bool: True if valid, False otherwise.
+    """
+    if isinstance(value, int) and min_value <= value <= max_value:
+        return True
+    return False
 
 
-def validate_input(username, password):
-    validate_username(username)
-    validate_password(password)  
-    return True  
+def validate_string(value: Any, allowed_values: Union[None, set] = None) -> bool:
+    """
+    Validate if the input is a string and optionally check against allowed values.
 
-# Main processing loop example
-if __name__ == '__main__':
-    try:
-        user_input = ('test_user', 'Pass1234')  # Example input
-        validate_input(*user_input)
-        print('Input is valid.')
-    except InputValidationError as e:
-        print(f'Input validation error: {e}')
+    Args:
+        value (Any): The value to validate.
+        allowed_values (set, optional): A set of allowed string values.
+
+    Returns:
+        bool: True if valid, False otherwise.
+    """
+    if isinstance(value, str):
+        if allowed_values is None or value in allowed_values:
+            return True
+    return False
+
+
+def validate_dict_keys(data: Dict[str, Any], required_keys: set) -> bool:
+    """
+    Validate if all required keys are present in the dictionary.
+
+    Args:
+        data (Dict[str, Any]): The dictionary to validate.
+        required_keys (set): A set of required keys.
+
+    Returns:
+        bool: True if all required keys are present, False otherwise.
+    """
+    return required_keys.issubset(data.keys())
