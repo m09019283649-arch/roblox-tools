@@ -1,50 +1,31 @@
-GAME_ID = 123456789
+BASE_URL = 'https://api.roblox.com/'
 
-MAX_PLAYERS = 30
+PAGE_SIZE = 100
 
-SERVER_NAME = 'MyRobloxServer'
+MAX_RETRIES = 5
 
-SPECIAL_ITEMS = {
-    'GoldSword': {
-        'value': 100,
-        'type': 'weapon',
-        'description': 'A shiny golden sword!'
-    },
-    'MagicPotion': {
-        'value': 50,
-        'type': 'consumable',
-        'description': 'A potion that restores health!'
-    }
+RETRY_DELAY = 2  # seconds
+
+ERROR_CODES = {
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    403: 'Forbidden',
+    404: 'Not Found',
+    500: 'Internal Server Error',
+    503: 'Service Unavailable',
 }
 
-DEFAULT_CONFIG = {
-    'gameMode': 'adventure',
-    'difficulty': 'normal',
-    'maxTime': 120,
-    'enableChat': True
-}
+DEFAULT_TIMEOUT = 10  # seconds
 
-ITEM_COLORS = {
-    'GoldSword': '#FFD700',
-    'MagicPotion': '#8A2BE2'
-}
+SUPPORTED_PLATFORMS = ['PC', 'Mobile', 'Xbox', 'VR']
 
-PLAYER_ROLES = [
-    'admin',
-    'moderator',
-    'player'
-]
-
-REGION_NAMES = [
-    'Town',
-    'Forest',
-    'Dungeon'
-]
-
-DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/your_webhook_here'
-
-WINNING_CONDITIONS = [
-    'collect_all_items',
-    'defeat_boss',
-    'complete_time_challenge'
+GAME_GENRES = [
+    'Action',
+    'Adventure',
+    'Role Playing',
+    'Simulation',
+    'Horror',
+    'Strategy',
+    'Tycoon',
+    'Obby',
 ]
